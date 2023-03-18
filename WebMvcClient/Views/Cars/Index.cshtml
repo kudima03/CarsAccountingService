@@ -1,0 +1,9 @@
+﻿@model IEnumerable<CarMainInfoViewModel>
+
+<a asp-controller="Cars" asp-action="CreateCar">Добавить автомобиль</a>
+
+@foreach (var item in Model)
+{
+    <partial name="CarView" for="@item"/>
+    <br/>
+}

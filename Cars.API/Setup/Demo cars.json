@@ -1,0 +1,32 @@
+[
+  {
+    "Id": 0,
+    "Model": "Oktavia",
+    "Manufacturer": "Skoda",
+    "YearOfManufacture": 2020,
+    "RegistrationNumber": "1897MP7",
+    "VinCode": "AOLDN75UDJ38IFNQ5",
+    "Mileage": 28500,
+    "Colour": "Black"
+  },
+  {
+    "Id": 0,
+    "Model": "Polo",
+    "Manufacturer": "Volkswagen",
+    "YearOfManufacture": 2016,
+    "RegistrationNumber": "1568AA1",
+    "VinCode": "ALNFROLY78ID63GHJ",
+    "Mileage": 60456,
+    "Colour": "Red"
+  },
+  {
+    "Id": 0,
+    "Model": "M5",
+    "Manufacturer": "BMW",
+    "YearOfManufacture": 2021,
+    "RegistrationNumber": "7825AE3",
+    "VinCode": "LOENTKFL75UJ78IFN",
+    "Mileage": 10980,
+    "Colour": "Blue"
+  }
+]

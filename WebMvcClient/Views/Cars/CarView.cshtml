@@ -1,0 +1,13 @@
+﻿@model CarMainInfoViewModel
+@{
+    ViewData["Title"] = "Автомобили";
+}
+
+<div class="car-view">
+    <hr/>
+    <a asp-controller="Cars" asp-action="CarDetails" asp-route-carId="@Model.Id">@Model.Manufacturer @Model.Model</a>
+    <br/>
+    <a asp-controller="Cars" asp-action="DeleteCar" asp-route-carId="@Model.Id">Удалить</a>
+    <a asp-controller="Cars" asp-action="UpdateCar" asp-route-carId="@Model.Id">Редактировать</a>
+    <br/>
+</div>
