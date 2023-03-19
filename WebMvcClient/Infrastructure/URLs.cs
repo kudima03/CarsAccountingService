@@ -9,9 +9,9 @@ public static class URLs
             return $"{hostUrl}/cars/{carId}";
         }
 
-        public static string GetCarsRangeUrl(string hostUrl, int skip, int take)
+        public static string GetCarsRangeUrl(string hostUrl, int fromInclusive, int toExclusive)
         {
-            return $"{hostUrl}/cars/{skip}:{take}";
+            return $"{hostUrl}/cars/range?fromInclusive={fromInclusive}&toExclusive={toExclusive}";
         }
 
         public static string GetCarsUrl(string hostUrl)

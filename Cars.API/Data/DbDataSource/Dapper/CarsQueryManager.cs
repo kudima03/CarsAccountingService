@@ -47,11 +47,14 @@ public static class CarsQueryManager
 
     public static string GetSelectRangeStatement(int skip, int take)
     {
-        return $"SELECT * FROM {TableName} SKIP {skip} TAKE {take}";
+        return $"SELECT * FROM {TableName} " +
+               $"ORDER BY {IdColumnName} " +
+               $"OFFSET {skip} ROWS " +
+               $"FETCH NEXT {take} ROWS ONLY;";
     }
 
     public static string GetUpdateStatement(Car car)
-    {
+    { 
         return $"UPDATE {TableName} " +
                $"SET {ModelColumnName} = '{car.Model}'," +
                $"{ManufacturerColumnName} = '{car.Manufacturer}'," +

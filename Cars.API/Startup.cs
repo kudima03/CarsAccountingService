@@ -5,6 +5,7 @@ using Cars.API.Models;
 using Cars.API.Models.AutomapperProfiles;
 using Cars.API.Models.DTOs;
 using Cars.API.ModelValidators;
+using Cars.API.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -27,9 +28,10 @@ public class Startup
         services.AddControllers();
         ConfigureAuthService(services);
         services.AddHttpContextAccessor();
-        services.AddTransient<IValidator<CarDTO>, CarValidator>();
+        services.AddTransient<IValidator<CarDTO>, CarDTOValidator>();
         services.AddTransient<IAsyncRepository<Car>, DapperCarsRepository>();
         services.AddAutoMapper(typeof(CarMapperConfiguration));
+        services.AddScoped<ICarsService, CarsService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

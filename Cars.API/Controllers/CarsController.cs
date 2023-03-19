@@ -1,12 +1,9 @@
-﻿using System.Net.Mime;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Cars.API.Data.Interfaces;
-using Cars.API.Models;
-using Cars.API.Models.DTOs;
+﻿using Cars.API.Models.DTOs;
+using Cars.API.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 namespace Cars.API.Controllers;
 
@@ -15,100 +12,158 @@ namespace Cars.API.Controllers;
 [Route("[controller]")]
 public class CarsController : ControllerBase
 {
-    private readonly IAsyncRepository<Car> _carsRepository;
+    private readonly ICarsService _carsService;
 
-    private readonly IValidator<CarDTO> _carsValidator;
+    private readonly ILogger<CarsController> _logger;
 
-    private readonly IMapper _mapper;
-
-    public CarsController(IAsyncRepository<Car> eventContext, IValidator<CarDTO> eventValidator, IMapper mapper)
+    public CarsController(ICarsService carsService, ILogger<CarsController> logger)
     {
-        _carsRepository = eventContext;
-        _carsValidator = eventValidator;
-        _mapper = mapper;
+        _carsService = carsService;
+        _logger = logger;
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CarMainInfoDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsAsync()
     {
-        var events = await _carsRepository.GetAllAsync();
-        return Ok(events.AsQueryable().ProjectTo<CarMainInfoDTO>(_mapper.ConfigurationProvider).AsEnumerable());
+        try
+        {
+            return Ok(await _carsService.GetAllAsync());
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
-    [HttpGet("{skip:int}:{take:int}")]
+    [HttpGet("range")]
     [ProducesResponseType(typeof(IEnumerable<CarMainInfoDTO>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsRangeAsync([FromQuery] int skip,
-        [FromQuery] int take)
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsRangeAsync([FromQuery]int fromInclusive, [FromQuery]int toExclusive)
     {
-        var events = await _carsRepository.GetRangeAsync(skip, take);
-        return Ok(events.AsQueryable().ProjectTo<CarMainInfoDTO>(_mapper.ConfigurationProvider).AsEnumerable());
+        if (fromInclusive < 0 || toExclusive < 0)
+        {
+            return BadRequest("Index cannot be less than zero.");
+        }
+        try
+        {
+            return Ok(await _carsService.GetRangeAsync(fromInclusive, toExclusive));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     [HttpGet("{carId:int}")]
     [ProducesResponseType(typeof(CarDTO), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<CarDTO>> CarByIdAsync(int carId)
     {
-        if (carId <= 0) return BadRequest("Id cannot be less than zero.");
+        try
+        {
+            if (carId <= 0) return BadRequest("Id cannot be less than zero.");
 
-        var car = await _carsRepository.GetByIdAsync(carId);
+            var car = await _carsService.GetByIdAsync(carId);
 
-        if (car == null) return NotFound($"Car with id:{carId} not found.");
+            if (car == null) return NotFound($"Car with id:{carId} not found.");
 
-        return Ok(_mapper.Map<CarDTO>(car));
+            return Ok(car);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     [HttpPost]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> CreateCarAsync([FromBody] CarDTO car)
     {
-        var validationResult = await _carsValidator.ValidateAsync(car);
-        if (!validationResult.IsValid) return BadRequest(validationResult.ToString());
-
-        car.Id = 0;
-        await _carsRepository.CreateAsync(_mapper.Map<Car>(car));
-        return Ok();
+        try
+        {
+            await _carsService.CreateAsync(car);
+            return Ok();
+        }
+        catch (ValidationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     [HttpPut]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> UpdateCarAsync([FromBody] CarDTO car)
     {
-        var validationResult = await _carsValidator.ValidateAsync(car);
-        if (!validationResult.IsValid) return BadRequest(validationResult.ToString());
-
-        var entity = _carsRepository.GetById(car.Id);
-
-        if (entity == null)
+        try
         {
-            car.Id = 0;
-            await _carsRepository.CreateAsync(_mapper.Map<Car>(car));
+            var entity = await _carsService.GetByIdAsync(car.Id);
+
+            if (entity == null)
+            {
+                await _carsService.CreateAsync(car);
+                return Ok();
+            }
+
+            await _carsService.UpdateAsync(car);
             return Ok();
         }
-
-        await _carsRepository.UpdateAsync(_mapper.Map<Car>(car));
-        return Ok();
+        catch (ValidationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     [HttpDelete("{carId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> DeleteCarAsync(int carId)
     {
-        if (carId <= 0) return BadRequest("Id cannot be less than zero.");
+        try
+        {
+            if (carId <= 0) return BadRequest("Id cannot be less than zero.");
 
-        var entityToDelete = await _carsRepository.GetByIdAsync(carId);
-        if (entityToDelete == null) return NotFound("Car not found.");
+            var entityToDelete = await _carsService.GetByIdAsync(carId);
+            if (entityToDelete == null) return NotFound("Car not found.");
 
-        await _carsRepository.DeleteAsync(entityToDelete);
-        return Ok();
+            await _carsService.DeleteAsync(entityToDelete);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 }

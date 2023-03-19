@@ -49,28 +49,28 @@ public class DapperCarsRepository : IAsyncRepository<Car>
         GC.SuppressFinalize(this);
     }
 
-    public IEnumerable<Car> GetAll()
+    public IQueryable<Car> GetAll()
     {
         var statement = CarsQueryManager.GetSelectAllStatement();
-        return _connection.Query<Car>(statement);
+        return _connection.Query<Car>(statement).AsQueryable();
     }
 
-    public IEnumerable<Car> GetRange(int skip, int take)
+    public IQueryable<Car> GetRange(int skip, int take)
     {
         var statement = CarsQueryManager.GetSelectRangeStatement(skip, take);
-        return _connection.Query<Car>(statement);
+        return _connection.Query<Car>(statement).AsQueryable();
     }
 
-    public async Task<IEnumerable<Car>> GetAllAsync()
+    public async Task<IQueryable<Car>> GetAllAsync()
     {
         var statement = CarsQueryManager.GetSelectAllStatement();
-        return await _connection.QueryAsync<Car>(statement);
+        return (await _connection.QueryAsync<Car>(statement)).AsQueryable();
     }
 
-    public async Task<IEnumerable<Car>> GetRangeAsync(int skip, int take)
+    public async Task<IQueryable<Car>> GetRangeAsync(int skip, int take)
     {
         var statement = CarsQueryManager.GetSelectRangeStatement(skip, take);
-        return await _connection.QueryAsync<Car>(statement);
+        return (await _connection.QueryAsync<Car>(statement)).AsQueryable();
     }
 
     public Car GetById(long id)

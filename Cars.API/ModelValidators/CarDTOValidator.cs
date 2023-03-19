@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Cars.API.ModelValidators;
 
-public class CarValidator : AbstractValidator<CarDTO>
+public class CarDTOValidator : AbstractValidator<CarDTO>
 {
-    public CarValidator()
+    public CarDTOValidator()
     {
         RuleFor(x => x)
             .NotNull()
@@ -32,7 +32,7 @@ public class CarValidator : AbstractValidator<CarDTO>
 
         RuleFor(x => x.VinCode)
             .NotEmpty()
-            .MaximumLength(17);
+            .Length(17);
 
         RuleFor(x => x.Mileage)
             .GreaterThanOrEqualTo(0);

@@ -2,8 +2,8 @@
 
 public interface IRepository<T> : IDisposable
 {
-    IEnumerable<T> GetAll();
-    IEnumerable<T> GetRange(int skip, int take);
+    IQueryable<T> GetAll();
+    IQueryable<T> GetRange(int skip, int take);
     T GetById(long id);
     T Create(T entity);
     T Update(T entity);
