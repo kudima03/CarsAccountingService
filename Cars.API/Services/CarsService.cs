@@ -36,21 +36,16 @@ public class CarsService : ICarsService
 
     public async Task<IEnumerable<CarDTO>> GetRangeAsync(int startIndex, int stopIndex)
     {
-        if (stopIndex == startIndex)
-        {
-            return new List<CarDTO>();
-        }
+        if (stopIndex == startIndex) return new List<CarDTO>();
         var orderByIdDescending = false;
         if (startIndex > stopIndex)
         {
             (startIndex, stopIndex) = (stopIndex, startIndex);
             orderByIdDescending = true;
         }
+
         var carsQuery = await _repository.GetRangeAsync(startIndex, stopIndex - startIndex);
-        if (orderByIdDescending)
-        {
-            carsQuery = carsQuery.OrderByDescending(x => x.Id);
-        }
+        if (orderByIdDescending) carsQuery = carsQuery.OrderByDescending(x => x.Id);
         return carsQuery.ProjectTo<CarDTO>(_mapper.ConfigurationProvider).AsEnumerable();
     }
 
@@ -63,10 +58,7 @@ public class CarsService : ICarsService
     public async Task<CarDTO> CreateAsync(CarDTO entity)
     {
         var validationResult = await _validator.ValidateAsync(entity);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
+        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
         var createdCar = await _repository.CreateAsync(_mapper.Map<Car>(entity));
         return _mapper.Map<CarDTO>(createdCar);
     }
@@ -74,10 +66,7 @@ public class CarsService : ICarsService
     public async Task<CarDTO> UpdateAsync(CarDTO entity)
     {
         var validationResult = await _validator.ValidateAsync(entity);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
+        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
         var updatedCar = await _repository.UpdateAsync(_mapper.Map<Car>(entity));
         return _mapper.Map<CarDTO>(updatedCar);
     }
@@ -85,10 +74,7 @@ public class CarsService : ICarsService
     public async Task DeleteAsync(CarDTO entity)
     {
         var validationResult = await _validator.ValidateAsync(entity);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
+        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
         await _repository.DeleteAsync(_mapper.Map<Car>(entity));
     }
 

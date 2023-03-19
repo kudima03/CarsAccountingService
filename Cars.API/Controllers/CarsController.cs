@@ -1,9 +1,9 @@
-﻿using Cars.API.Models.DTOs;
+﻿using System.Net.Mime;
+using Cars.API.Models.DTOs;
 using Cars.API.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Mime;
 
 namespace Cars.API.Controllers;
 
@@ -43,12 +43,10 @@ public class CarsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<CarMainInfoDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsRangeAsync([FromQuery]int fromInclusive, [FromQuery]int toExclusive)
+    public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsRangeAsync([FromQuery] int fromInclusive,
+        [FromQuery] int toExclusive)
     {
-        if (fromInclusive < 0 || toExclusive < 0)
-        {
-            return BadRequest("Index cannot be less than zero.");
-        }
+        if (fromInclusive < 0 || toExclusive < 0) return BadRequest("Index cannot be less than zero.");
         try
         {
             return Ok(await _carsService.GetRangeAsync(fromInclusive, toExclusive));

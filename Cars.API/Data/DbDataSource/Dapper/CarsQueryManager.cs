@@ -54,7 +54,7 @@ public static class CarsQueryManager
     }
 
     public static string GetUpdateStatement(Car car)
-    { 
+    {
         return $"UPDATE {TableName} " +
                $"SET {ModelColumnName} = '{car.Model}'," +
                $"{ManufacturerColumnName} = '{car.Manufacturer}'," +
