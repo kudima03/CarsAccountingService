@@ -1,0 +1,71 @@
+version: '3.4'
+
+services:
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - MSSQL_SA_PASSWORD=P@ssw0rd
+      - ACCEPT_EULA=Y
+    ports:
+      - "5434:1433"
+
+  cars.api:
+    image: mcr.microsoft.com/dotnet/samples:aspnetapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ExternalIdentityUrl=http://host.docker.internal:5002
+      - DefaultConnection=Server=sqldata;Initial Catalog=CarsDatabase;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    ports:
+      - "5000:80"
+      - "5001:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ~/.aspnet/https:/https:ro
+    depends_on:
+      - sqldata
+      - identityserver
+
+  identityserver:
+    image: mcr.microsoft.com/dotnet/samples:aspnetapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - MvcClient=http://host.docker.internal:5004
+      - ConnectionString=Server=sqldata;Initial Catalog=CarsDatabase;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;
+      - TokenLifetimeMinutes=120
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    ports:
+      - "5002:80"
+      - "5003:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ~/.aspnet/https:/https:ro
+    depends_on:
+      - sqldata
+
+  webmvcclient:
+    image: mcr.microsoft.com/dotnet/samples:aspnetapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - IdentityUrl=http://host.docker.internal:5002
+      - CarsApiUrl=http://host.docker.internal:5000
+      - SessionCookieLifetimeMinutes=120
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    ports:
+      - "5004:80"
+      - "5005:443"
+    volumes:
+      - ~/.aspnet/https:/https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - sqldata
+      - identityserver

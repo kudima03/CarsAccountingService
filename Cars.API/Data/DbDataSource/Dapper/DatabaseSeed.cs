@@ -12,7 +12,7 @@ public class DatabaseSeed
 
     public DatabaseSeed(IConfiguration configuration)
     {
-        _dbConnectionString = configuration.GetConnectionString("DefaultConnection");
+        _dbConnectionString = configuration.GetValue<string>("DefaultConnection");
     }
 
     public void Seed()

@@ -1,13 +1,20 @@
-﻿{
+{
   "profiles": {
     "WebMvcClient": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "https://localhost:7001/cars/Index",
-      "applicationUrl": "https://localhost:7001;http://localhost:7000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:7001;http://localhost:7000"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/cars/Index",
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

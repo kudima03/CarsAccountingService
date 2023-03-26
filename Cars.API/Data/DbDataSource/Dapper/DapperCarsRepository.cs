@@ -14,7 +14,7 @@ public class DapperCarsRepository : IAsyncRepository<Car>
 
     public DapperCarsRepository(IConfiguration configuration)
     {
-        _connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
+        _connection = new SqlConnection(configuration.GetValue<string>("DefaultConnection"));
     }
 
     public Car Create(Car entity)

@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  cars.api:
+    image: ${DOCKER_REGISTRY-}carsapi
+    build:
+      context: .
+      dockerfile: Cars.API/Dockerfile
+
+  identityserver:
+    image: ${DOCKER_REGISTRY-}identityserver
+    build:
+      context: .
+      dockerfile: IdentityServer/Dockerfile
+
+
+  webmvcclient:
+    image: ${DOCKER_REGISTRY-}webmvcclient
+    build:
+      context: .
+      dockerfile: WebMvcClient/Dockerfile
+
