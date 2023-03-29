@@ -1,0 +1,39 @@
+image: mcr.microsoft.com/dotnet/runtime:6.0
+
+stages:
+  - build
+  - test
+  - deploy
+
+before_script:
+  - $PSVersionTable.PSVersion
+  - dotnet --version
+  - nuget help | select-string Version
+
+build job:
+  script:
+    - echo "building..."
+  tags:
+    - windows
+  stage: build
+
+test and cover job:
+  script:
+    - echo "running tests and coverage analysis..."
+  tags:
+    - windows
+  stage: test
+
+pack and deploy job:
+  script:
+    - echo "packing and pushing to nuget..."
+  tags:
+    - windows
+  stage: deploy
+
+pages:
+  script:
+    - echo "creating docs..."
+  tags:
+    - windows
+  stage: deploy
