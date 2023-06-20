@@ -1,9 +1,9 @@
-﻿using System.Net.Mime;
-using Cars.API.Models.DTOs;
+﻿using Cars.API.Models.DTOs;
 using Cars.API.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 namespace Cars.API.Controllers;
 
@@ -35,6 +35,7 @@ public class CarsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }
@@ -46,7 +47,11 @@ public class CarsController : ControllerBase
     public async Task<ActionResult<IEnumerable<CarMainInfoDTO>>> CarsRangeAsync([FromQuery] int fromInclusive,
         [FromQuery] int toExclusive)
     {
-        if (fromInclusive < 0 || toExclusive < 0) return BadRequest("Index cannot be less than zero.");
+        if (fromInclusive < 0 || toExclusive < 0)
+        {
+            return BadRequest("Index cannot be less than zero.");
+        }
+
         try
         {
             return Ok(await _carsService.GetRangeAsync(fromInclusive, toExclusive));
@@ -54,6 +59,7 @@ public class CarsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }
@@ -68,17 +74,24 @@ public class CarsController : ControllerBase
     {
         try
         {
-            if (carId <= 0) return BadRequest("Id cannot be less than zero.");
+            if (carId <= 0)
+            {
+                return BadRequest("Id cannot be less than zero.");
+            }
 
-            var car = await _carsService.GetByIdAsync(carId);
+            CarDTO? car = await _carsService.GetByIdAsync(carId);
 
-            if (car == null) return NotFound($"Car with id:{carId} not found.");
+            if (car == null)
+            {
+                return NotFound($"Car with id:{carId} not found.");
+            }
 
             return Ok(car);
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }
@@ -94,6 +107,7 @@ public class CarsController : ControllerBase
         try
         {
             await _carsService.CreateAsync(car);
+
             return Ok();
         }
         catch (ValidationException e)
@@ -103,6 +117,7 @@ public class CarsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }
@@ -118,15 +133,17 @@ public class CarsController : ControllerBase
     {
         try
         {
-            var entity = await _carsService.GetByIdAsync(car.Id);
+            CarDTO? entity = await _carsService.GetByIdAsync(car.Id);
 
             if (entity == null)
             {
                 await _carsService.CreateAsync(car);
+
                 return Ok();
             }
 
             await _carsService.UpdateAsync(car);
+
             return Ok();
         }
         catch (ValidationException e)
@@ -136,6 +153,7 @@ public class CarsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }
@@ -150,17 +168,26 @@ public class CarsController : ControllerBase
     {
         try
         {
-            if (carId <= 0) return BadRequest("Id cannot be less than zero.");
+            if (carId <= 0)
+            {
+                return BadRequest("Id cannot be less than zero.");
+            }
 
-            var entityToDelete = await _carsService.GetByIdAsync(carId);
-            if (entityToDelete == null) return NotFound("Car not found.");
+            CarDTO? entityToDelete = await _carsService.GetByIdAsync(carId);
+
+            if (entityToDelete == null)
+            {
+                return NotFound("Car not found.");
+            }
 
             await _carsService.DeleteAsync(entityToDelete);
+
             return Ok();
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
     }

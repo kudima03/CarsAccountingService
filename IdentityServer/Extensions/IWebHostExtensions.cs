@@ -7,10 +7,10 @@ public static class IWebHostExtensions
     public static IWebHost MigrateDbContext<TContext>(this IWebHost webHost, Action<TContext, IServiceProvider> seeder)
         where TContext : DbContext
     {
-        using var scope = webHost.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var logger = services.GetRequiredService<ILogger<TContext>>();
-        var context = services.GetService<TContext>();
+        using IServiceScope scope = webHost.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        ILogger<TContext> logger = services.GetRequiredService<ILogger<TContext>>();
+        TContext? context = services.GetService<TContext>();
 
         try
         {
@@ -26,8 +26,9 @@ public static class IWebHostExtensions
         return webHost;
     }
 
-    private static void InvokeSeeder<TContext>(Action<TContext, IServiceProvider> seeder, TContext context,
-        IServiceProvider services)
+    private static void InvokeSeeder<TContext>(Action<TContext, IServiceProvider> seeder,
+                                               TContext context,
+                                               IServiceProvider services)
         where TContext : DbContext
     {
         context.Database.Migrate();

@@ -1,5 +1,6 @@
-﻿using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Primitives;
+using System.Net.Http.Headers;
 
 namespace WebMvcClient.Infrastructure;
 
@@ -13,30 +14,49 @@ public class HttpClientAuthorizationDelegatingHandler : DelegatingHandler
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+                                                                 CancellationToken cancellationToken)
     {
-        var authorizationHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"];
 
         if (!string.IsNullOrEmpty(authorizationHeader))
-            request.Headers.Add("Authorization", new List<string> { authorizationHeader });
+        {
+            request.Headers.Add("Authorization",
+                                new List<string>
+                                {
+                                    authorizationHeader
+                                });
+        }
 
-        var token = await GetToken();
+        string? token = await GetToken();
 
-        if (token != null) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (token != null)
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
 
         return await base.SendAsync(request, cancellationToken);
     }
 
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var authorizationHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"];
 
         if (!string.IsNullOrEmpty(authorizationHeader))
-            request.Headers.Add("Authorization", new List<string> { authorizationHeader });
+        {
+            request.Headers.Add("Authorization",
+                                new List<string>
+                                {
+                                    authorizationHeader
+                                });
+        }
 
-        var token = GetToken().Result;
+        string? token = GetToken().Result;
 
-        if (token != null) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (token != null)
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
         return base.Send(request, cancellationToken);
     }
 

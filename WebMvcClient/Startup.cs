@@ -45,7 +45,10 @@ public class Startup
 
         app.UseRouting();
 
-        app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Lax });
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            MinimumSameSitePolicy = SameSiteMode.Lax
+        });
 
         app.UseAuthentication();
 
@@ -58,50 +61,50 @@ public class Startup
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services,
-        IConfiguration configuration)
+                                                             IConfiguration configuration)
     {
-        var identityUrl = configuration.GetValue<string>("IdentityUrl");
-        var sessionCookieLifetime = configuration.GetValue("SessionCookieLifetimeMinutes", 120);
+        string? identityUrl = configuration.GetValue<string>("IdentityUrl");
+        int sessionCookieLifetime = configuration.GetValue("SessionCookieLifetimeMinutes", 120);
 
         services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddCookie(setup =>
-            {
-                setup.SlidingExpiration = true;
-                setup.ExpireTimeSpan = TimeSpan.FromMinutes(sessionCookieLifetime);
-            })
-            .AddOpenIdConnect(options =>
-            {
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.Authority = identityUrl;
-                options.ClientId = "mvc";
-                options.ClientSecret = "secret";
-                options.ResponseType = "code";
-                options.UsePkce = false;
-                options.SaveTokens = true;
-                options.GetClaimsFromUserInfoEndpoint = true;
-                options.RequireHttpsMetadata = false;
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("offline_access");
-                options.Scope.Add("Cars.API");
-            });
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddCookie(setup =>
+                {
+                    setup.SlidingExpiration = true;
+                    setup.ExpireTimeSpan = TimeSpan.FromMinutes(sessionCookieLifetime);
+                })
+                .AddOpenIdConnect(options =>
+                {
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.Authority = identityUrl;
+                    options.ClientId = "mvc";
+                    options.ClientSecret = "secret";
+                    options.ResponseType = "code";
+                    options.UsePkce = false;
+                    options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.RequireHttpsMetadata = false;
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("offline_access");
+                    options.Scope.Add("Cars.API");
+                });
 
         return services;
     }
 
     public static IServiceCollection AddHttpClientServices(this IServiceCollection services,
-        IConfiguration configuration)
+                                                           IConfiguration configuration)
     {
         services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddTransient<HttpClientAuthorizationDelegatingHandler>();
 
         services.AddHttpClient<ICarsHttpClient, CarsHttpClient>()
-            .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>();
+                .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>();
 
         return services;
     }

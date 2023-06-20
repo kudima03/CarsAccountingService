@@ -17,12 +17,10 @@ public class AccountController : Controller
     private readonly ILoginService<ApplicationUser> _loginService;
     private readonly UserManager<ApplicationUser> _userManager;
 
-
-    public AccountController(
-        ILoginService<ApplicationUser> loginService,
-        IIdentityServerInteractionService interaction,
-        UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+    public AccountController(ILoginService<ApplicationUser> loginService,
+                             IIdentityServerInteractionService interaction,
+                             UserManager<ApplicationUser> userManager,
+                             IConfiguration configuration)
     {
         _loginService = loginService;
         _interaction = interaction;
@@ -33,9 +31,10 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Login(string returnUrl)
     {
-        var authorizationContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
-        var vm = BuildLoginViewModel(returnUrl, authorizationContext);
+        AuthorizationRequest? authorizationContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
+        LoginViewModel vm = BuildLoginViewModel(returnUrl, authorizationContext);
         ViewData["ReturnUrl"] = returnUrl;
+
         return View(vm);
     }
 
@@ -45,26 +44,34 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var user = await _loginService.FindByUsername(model.Email);
+            ApplicationUser user = await _loginService.FindByUsername(model.Email);
+
             if (await _loginService.ValidateCredentials(user, model.Password))
             {
-                var tokenLifeTime = _configuration.GetValue("TokenLifetimeMinutes", 120);
-                var properties = new AuthenticationProperties
+                int tokenLifeTime = _configuration.GetValue("TokenLifetimeMinutes", 120);
+
+                AuthenticationProperties properties = new AuthenticationProperties
                 {
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(tokenLifeTime),
                     AllowRefresh = true,
                     RedirectUri = model.ReturnUrl,
                     IsPersistent = false
                 };
+
                 await _loginService.SignInAsync(user, properties);
-                if (_interaction.IsValidReturnUrl(model.ReturnUrl)) return Redirect(model.ReturnUrl);
+
+                if (_interaction.IsValidReturnUrl(model.ReturnUrl))
+                {
+                    return Redirect(model.ReturnUrl);
+                }
+
                 return Redirect("~/");
             }
 
             ModelState.AddModelError("", "Invalid username or password.");
         }
 
-        var vm = await BuildLoginViewModel(model);
+        LoginViewModel vm = await BuildLoginViewModel(model);
 
         ViewData["ReturnUrl"] = model.ReturnUrl;
 
@@ -82,9 +89,10 @@ public class AccountController : Controller
 
     private async Task<LoginViewModel> BuildLoginViewModel(LoginViewModel model)
     {
-        var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-        var vm = BuildLoginViewModel(model.ReturnUrl, context);
+        AuthorizationRequest? context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+        LoginViewModel vm = BuildLoginViewModel(model.ReturnUrl, context);
         vm.Email = model.Email;
+
         return vm;
     }
 
@@ -93,6 +101,7 @@ public class AccountController : Controller
     public IActionResult Register(string returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
+
         return View();
     }
 
@@ -102,9 +111,10 @@ public class AccountController : Controller
     public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
+
         if (ModelState.IsValid)
         {
-            var user = new ApplicationUser
+            ApplicationUser user = new ApplicationUser
             {
                 UserName = model.Email,
                 Email = model.Email,
@@ -115,10 +125,13 @@ public class AccountController : Controller
                 Street = model.User.Street,
                 PhoneNumber = model.User.PhoneNumber
             };
-            var result = await _userManager.CreateAsync(user, model.Password);
+
+            IdentityResult? result = await _userManager.CreateAsync(user, model.Password);
+
             if (result.Errors.Any())
             {
                 AddErrors(result);
+
                 return View(model);
             }
         }
@@ -126,9 +139,15 @@ public class AccountController : Controller
         if (returnUrl != null)
         {
             if (HttpContext.User.Identity.IsAuthenticated)
+            {
                 return Redirect(returnUrl);
+            }
+
             if (ModelState.IsValid)
+            {
                 return RedirectToAction("login", "account", returnUrl);
+            }
+
             return View(model);
         }
 
@@ -137,6 +156,9 @@ public class AccountController : Controller
 
     private void AddErrors(IdentityResult result)
     {
-        foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+        foreach (IdentityError? error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
     }
 }

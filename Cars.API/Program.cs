@@ -6,8 +6,8 @@ internal class Program
 {
     public static void Main(string[] args)
     {
-        var host = CreateHostBuilder(args).Build();
-        var configManager = host.Services.GetService<IConfiguration>();
+        IWebHost host = CreateHostBuilder(args).Build();
+        IConfiguration? configManager = host.Services.GetService<IConfiguration>();
         new DatabaseInitializer(configManager).Initialize();
         new DatabaseSeed(configManager).Seed();
         host.Run();
@@ -16,6 +16,6 @@ internal class Program
     public static IWebHostBuilder CreateHostBuilder(string[] args)
     {
         return WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+                      .UseStartup<Startup>();
     }
 }

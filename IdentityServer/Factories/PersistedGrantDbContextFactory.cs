@@ -9,14 +9,16 @@ public class PersistedGrantDbContextFactory : IDesignTimeDbContextFactory<Persis
 {
     public PersistedGrantDbContext CreateDbContext(string[] args)
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
+        IConfigurationRoot config = new ConfigurationBuilder()
+                                    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+                                    .AddJsonFile("appsettings.json")
+                                    .AddEnvironmentVariables()
+                                    .Build();
 
-        var optionsBuilder = new DbContextOptionsBuilder<PersistedGrantDbContext>();
-        var operationOptions = new OperationalStoreOptions();
+        DbContextOptionsBuilder<PersistedGrantDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<PersistedGrantDbContext>();
+
+        OperationalStoreOptions operationOptions = new OperationalStoreOptions();
 
         optionsBuilder.UseSqlServer(config["ConnectionString"], o => o.MigrationsAssembly("IdentityServer"));
 

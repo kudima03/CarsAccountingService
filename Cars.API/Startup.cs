@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Cars.API.Data.DbDataSource.Dapper;
+﻿using Cars.API.Data.DbDataSource.Dapper;
 using Cars.API.Data.Interfaces;
 using Cars.API.Models;
 using Cars.API.Models.AutomapperProfiles;
@@ -8,6 +7,7 @@ using Cars.API.ModelValidators;
 using Cars.API.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Cars.API;
 
@@ -61,17 +61,18 @@ public class Startup
     {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
 
-        var identityUrl = Configuration.GetValue<string>("ExternalIdentityUrl");
+        string? identityUrl = Configuration.GetValue<string>("ExternalIdentityUrl");
 
         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            options.Authority = identityUrl;
-            options.RequireHttpsMetadata = false;
-            options.Audience = "Cars.API";
-        });
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = identityUrl;
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = "Cars.API";
+                });
     }
 }

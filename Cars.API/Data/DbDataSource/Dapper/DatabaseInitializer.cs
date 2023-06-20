@@ -1,6 +1,6 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace Cars.API.Data.DbDataSource.Dapper;
 
@@ -15,7 +15,7 @@ public class DatabaseInitializer
 
     public void Initialize()
     {
-        var command = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Setup", "InitialScript.sql"));
+        string command = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Setup", "InitialScript.sql"));
 
         using IDbConnection connection = new SqlConnection(_dbConnectionString);
         connection.Execute(command);

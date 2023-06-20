@@ -7,8 +7,10 @@ public class AuthorizationDbContextSeed
 {
     private readonly IPasswordHasher<ApplicationUser> passwordHasher = new PasswordHasher<ApplicationUser>();
 
-    public async Task SeedAsync(AuthorizationDbContext context, IWebHostEnvironment environment,
-        ILogger<AuthorizationDbContextSeed> logger, int retry = 0)
+    public async Task SeedAsync(AuthorizationDbContext context,
+                                IWebHostEnvironment environment,
+                                ILogger<AuthorizationDbContextSeed> logger,
+                                int retry = 0)
     {
         try
         {
@@ -31,7 +33,7 @@ public class AuthorizationDbContextSeed
 
     private List<ApplicationUser> GetDefaultUsers()
     {
-        var user = new ApplicationUser
+        ApplicationUser user = new ApplicationUser
         {
             City = "Minsk",
             Country = "Belarus",
@@ -49,6 +51,9 @@ public class AuthorizationDbContextSeed
 
         user.PasswordHash = passwordHasher.HashPassword(user, "demopassword");
 
-        return new List<ApplicationUser> { user };
+        return new List<ApplicationUser>
+        {
+            user
+        };
     }
 }

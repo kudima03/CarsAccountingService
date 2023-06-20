@@ -8,12 +8,15 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var host = CreateHostBuilder(args).Build();
+        IWebHost host = CreateHostBuilder(args).Build();
+
         host.MigrateDbContext<PersistedGrantDbContext>((_, __) => { })
             .MigrateDbContext<AuthorizationDbContext>((context, services) =>
             {
-                var env = services.GetService<IWebHostEnvironment>();
-                var logger = services.GetService<ILogger<AuthorizationDbContextSeed>>();
+                IWebHostEnvironment? env = services.GetService<IWebHostEnvironment>();
+
+                ILogger<AuthorizationDbContextSeed>?
+                    logger = services.GetService<ILogger<AuthorizationDbContextSeed>>();
 
                 new AuthorizationDbContextSeed()
                     .SeedAsync(context, env, logger, 10)
@@ -21,17 +24,19 @@ internal class Program
             })
             .MigrateDbContext<ConfigurationDbContext>((context, services) =>
             {
-                var cfg = services.GetService<IConfiguration>();
+                IConfiguration? cfg = services.GetService<IConfiguration>();
+
                 new ConfigurationDbContextSeed()
                     .SeedAsync(context, cfg)
                     .Wait();
             });
+
         host.Run();
     }
 
     public static IWebHostBuilder CreateHostBuilder(string[] args)
     {
         return WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+                      .UseStartup<Startup>();
     }
 }

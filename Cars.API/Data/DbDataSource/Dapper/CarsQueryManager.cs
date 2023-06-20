@@ -14,7 +14,6 @@ public static class CarsQueryManager
     public const string MileageColumnName = "[Mileage]";
     public const string ColourColumnName = "[Colour]";
 
-
     public static string GetInsertStatement(Car car)
     {
         return "INSERT INTO " +

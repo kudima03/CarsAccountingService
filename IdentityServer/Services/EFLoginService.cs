@@ -25,8 +25,9 @@ public class EFLoginService : ILoginService<ApplicationUser>
         return _signInManager.SignInAsync(user, true);
     }
 
-    public Task SignInAsync(ApplicationUser user, AuthenticationProperties properties,
-        string authenticationMethod = null)
+    public Task SignInAsync(ApplicationUser user,
+                            AuthenticationProperties properties,
+                            string authenticationMethod = null)
     {
         return _signInManager.SignInAsync(user, properties, authenticationMethod);
     }

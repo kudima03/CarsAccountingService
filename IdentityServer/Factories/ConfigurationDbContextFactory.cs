@@ -9,13 +9,15 @@ public class ConfigurationDbContextFactory : IDesignTimeDbContextFactory<Configu
 {
     public ConfigurationDbContext CreateDbContext(string[] args)
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
-            .AddJsonFile("appsettings.json")
-            .Build();
+        IConfigurationRoot config = new ConfigurationBuilder()
+                                    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+                                    .AddJsonFile("appsettings.json")
+                                    .Build();
 
-        var optionsBuilder = new DbContextOptionsBuilder<ConfigurationDbContext>();
-        var storeOptions = new ConfigurationStoreOptions();
+        DbContextOptionsBuilder<ConfigurationDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<ConfigurationDbContext>();
+
+        ConfigurationStoreOptions storeOptions = new ConfigurationStoreOptions();
 
         optionsBuilder.UseSqlServer(config["ConnectionString"], o => o.MigrationsAssembly("IdentityServer"));
 

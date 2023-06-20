@@ -1,6 +1,6 @@
-﻿using System.Text;
+﻿using Cars.API.Models.DTOs;
+using System.Text;
 using System.Text.Json;
-using Cars.API.Models.DTOs;
 using WebMvcClient.Infrastructure;
 
 namespace WebMvcClient.Services;
@@ -24,12 +24,13 @@ public class CarsHttpClient : ICarsHttpClient
     /// <exception cref="HttpRequestException"></exception>
     public async Task DeleteCarAsync(int carId)
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
             RequestUri = new Uri(URLs.Cars.DeleteCarUrl(_carsApiUrl, carId))
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 
@@ -43,30 +44,42 @@ public class CarsHttpClient : ICarsHttpClient
     /// <exception cref="HttpRequestException"></exception>
     public async Task<List<CarMainInfoDTO>> GetAllCarsAsync()
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
             RequestUri = new Uri(URLs.Cars.GetCarsUrl(_carsApiUrl))
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
+
         return JsonSerializer.Deserialize<List<CarMainInfoDTO>>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CarMainInfoDTO>();
+                                                                new JsonSerializerOptions
+                                                                {
+                                                                    PropertyNameCaseInsensitive = true
+                                                                }) ??
+               new List<CarMainInfoDTO>();
     }
 
     public async Task<List<CarMainInfoDTO>> GetCarsRangeAsync(int skip, int take)
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
             RequestUri = new Uri(URLs.Cars.GetCarsRangeUrl(_carsApiUrl, skip, take))
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
+
         return JsonSerializer.Deserialize<List<CarMainInfoDTO>>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<CarMainInfoDTO>();
+                                                                new JsonSerializerOptions
+                                                                {
+                                                                    PropertyNameCaseInsensitive = true
+                                                                }) ??
+               new List<CarMainInfoDTO>();
     }
 
     /// <summary>
@@ -79,16 +92,22 @@ public class CarsHttpClient : ICarsHttpClient
     /// <exception cref="HttpRequestException"></exception>
     public async Task<CarDTO> GetCarAsync(int carId)
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
             RequestUri = new Uri(URLs.Cars.GetCarByIdUrl(_carsApiUrl, carId))
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
+
         return JsonSerializer.Deserialize<CarDTO>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new CarDTO();
+                                                  new JsonSerializerOptions
+                                                  {
+                                                      PropertyNameCaseInsensitive = true
+                                                  }) ??
+               new CarDTO();
     }
 
     /// <summary>
@@ -99,13 +118,14 @@ public class CarsHttpClient : ICarsHttpClient
     /// <exception cref="HttpRequestException"></exception>
     public async Task CreateCarAsync(CarDTO car)
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = new Uri(URLs.Cars.PostCarUrl(_carsApiUrl)),
             Content = new StringContent(JsonSerializer.Serialize(car), Encoding.UTF8, "application/json")
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 
@@ -117,13 +137,14 @@ public class CarsHttpClient : ICarsHttpClient
     /// <exception cref="HttpRequestException"></exception>
     public async Task UpdateCarAsync(CarDTO car)
     {
-        var request = new HttpRequestMessage
+        HttpRequestMessage request = new HttpRequestMessage
         {
             Method = HttpMethod.Put,
             RequestUri = new Uri(URLs.Cars.UpdateCarUrl(_carsApiUrl)),
             Content = new StringContent(JsonSerializer.Serialize(car), Encoding.UTF8, "application/json")
         };
-        var response = await _httpClient.SendAsync(request);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 }

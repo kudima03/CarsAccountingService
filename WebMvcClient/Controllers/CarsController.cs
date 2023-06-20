@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Cars.API.Models.DTOs;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,8 +34,11 @@ public class CarsController : Controller
     {
         try
         {
-            var cars = await _eventsHttpClient.GetAllCarsAsync();
-            return View(cars.AsQueryable().ProjectTo<CarMainInfoViewModel>(_mapper.ConfigurationProvider).AsEnumerable());
+            List<CarMainInfoDTO> cars = await _eventsHttpClient.GetAllCarsAsync();
+
+            return View(cars.AsQueryable()
+                            .ProjectTo<CarMainInfoViewModel>(_mapper.ConfigurationProvider)
+                            .AsEnumerable());
         }
         catch (Exception e)
         {
@@ -67,9 +71,15 @@ public class CarsController : Controller
     {
         try
         {
-            var validationResult = await _validator.ValidateAsync(car);
-            if (!validationResult.IsValid) return View("ValidationErrors", validationResult.Errors);
+            ValidationResult? validationResult = await _validator.ValidateAsync(car);
+
+            if (!validationResult.IsValid)
+            {
+                return View("ValidationErrors", validationResult.Errors);
+            }
+
             await _eventsHttpClient.CreateCarAsync(_mapper.Map<CarDTO>(car));
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception e)
@@ -90,9 +100,15 @@ public class CarsController : Controller
     {
         try
         {
-            var validationResult = await _validator.ValidateAsync(car);
-            if (!validationResult.IsValid) return View("ValidationErrors", validationResult.Errors);
+            ValidationResult? validationResult = await _validator.ValidateAsync(car);
+
+            if (!validationResult.IsValid)
+            {
+                return View("ValidationErrors", validationResult.Errors);
+            }
+
             await _eventsHttpClient.UpdateCarAsync(_mapper.Map<CarDTO>(car));
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception e)
@@ -107,6 +123,7 @@ public class CarsController : Controller
         try
         {
             await _eventsHttpClient.DeleteCarAsync(carId);
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception e)

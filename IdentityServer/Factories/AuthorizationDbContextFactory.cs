@@ -8,13 +8,14 @@ public class AuthorizationDbContextFactory : IDesignTimeDbContextFactory<Authori
 {
     public AuthorizationDbContext CreateDbContext(string[] args)
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
+        IConfigurationRoot config = new ConfigurationBuilder()
+                                    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+                                    .AddJsonFile("appsettings.json")
+                                    .AddEnvironmentVariables()
+                                    .Build();
 
-        var optionsBuilder = new DbContextOptionsBuilder<AuthorizationDbContext>();
+        DbContextOptionsBuilder<AuthorizationDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<AuthorizationDbContext>();
 
         optionsBuilder.UseSqlServer(config["ConnectionString"], o => o.MigrationsAssembly("IdentityServer"));
 

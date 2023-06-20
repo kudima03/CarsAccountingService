@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using IdentityServer.Data;
+﻿using IdentityServer.Data;
 using IdentityServer.Models;
 using IdentityServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace IdentityServer;
 
@@ -25,46 +25,52 @@ public class Startup
         services.AddControllersWithViews();
 
         services.AddDbContext<AuthorizationDbContext>(options =>
-            options.UseSqlServer(Configuration["ConnectionString"],
-                sqlOptions =>
-                {
-                    sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
-                    sqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
-                }));
+                                                          options.UseSqlServer(Configuration["ConnectionString"],
+                                                                               sqlOptions =>
+                                                                               {
+                                                                                   sqlOptions
+                                                                                       .MigrationsAssembly(typeof(
+                                                                                               Startup).GetTypeInfo()
+                                                                                           .Assembly.GetName()
+                                                                                           .Name);
+
+                                                                                   sqlOptions.EnableRetryOnFailure(15,
+                                                                                    TimeSpan.FromSeconds(30),
+                                                                                    null);
+                                                                               }));
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<AuthorizationDbContext>()
-            .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<AuthorizationDbContext>()
+                .AddDefaultTokenProviders();
 
-
-        var connectionString = Configuration["ConnectionString"];
-        var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+        string? connectionString = Configuration["ConnectionString"];
+        string? migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
         services.AddIdentityServer(options =>
-            {
-                options.IssuerUri = "IdentityServer";
-                options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
-            })
-            .AddAspNetIdentity<ApplicationUser>()
-            .AddConfigurationStore(options =>
-            {
-                options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString,
-                    sqlOptions =>
-                    {
-                        sqlOptions.MigrationsAssembly(migrationsAssembly);
-                        sqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
-                    });
-            })
-            .AddOperationalStore(options =>
-            {
-                options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString,
-                    sqlOptions =>
-                    {
-                        sqlOptions.MigrationsAssembly(migrationsAssembly);
-                        sqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
-                    });
-            })
-            .AddSigningCredential(Certificate.Certificate.Get());
+                {
+                    options.IssuerUri = "IdentityServer";
+                    options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
+                })
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString,
+                     sqlOptions =>
+                     {
+                         sqlOptions.MigrationsAssembly(migrationsAssembly);
+                         sqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
+                     });
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString,
+                     sqlOptions =>
+                     {
+                         sqlOptions.MigrationsAssembly(migrationsAssembly);
+                         sqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
+                     });
+                })
+                .AddSigningCredential(Certificate.Certificate.Get());
 
         services.AddTransient<ILoginService<ApplicationUser>, EFLoginService>();
         services.AddTransient<IRedirectService, RedirectService>();

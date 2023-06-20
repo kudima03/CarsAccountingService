@@ -11,7 +11,10 @@ public static class Config
         {
             new("Cars.API")
             {
-                Scopes = new[] { "Cars.API" }
+                Scopes = new[]
+                {
+                    "Cars.API"
+                }
             }
         };
     }
@@ -32,7 +35,10 @@ public static class Config
             {
                 ClientId = "mvc",
                 ClientName = "CarsMvcClient",
-                ClientSecrets = new List<Secret> { new("secret".Sha256()) },
+                ClientSecrets = new List<Secret>
+                {
+                    new("secret".Sha256())
+                },
                 AllowedGrantTypes = GrantTypes.Code,
                 AllowAccessTokensViaBrowser = false,
                 RequireConsent = false,
@@ -55,7 +61,7 @@ public static class Config
                     "Cars.API"
                 },
                 RequirePkce = false,
-                AccessTokenLifetime = 60 * 60 * 2, // 2 hours
+                AccessTokenLifetime = 60 * 60 * 2,  // 2 hours
                 IdentityTokenLifetime = 60 * 60 * 2 // 2 hours
             }
         };

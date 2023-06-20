@@ -7,18 +7,24 @@ public class RedirectService : IRedirectService
 {
     public string ExtractRedirectUriFromReturnUrl(string url)
     {
-        var decodedUrl = WebUtility.HtmlDecode(url);
-        var results = Regex.Split(decodedUrl, "redirect_uri=");
+        string decodedUrl = WebUtility.HtmlDecode(url);
+        string[] results = Regex.Split(decodedUrl, "redirect_uri=");
+
         if (results.Length < 2)
+        {
             return "";
+        }
 
-        var result = results[1];
+        string result = results[1];
 
-        var splitKey = result.Contains("signin-oidc") ? "signin-oidc" : "scope";
+        string splitKey = result.Contains("signin-oidc") ? "signin-oidc" : "scope";
 
         results = Regex.Split(result, splitKey);
+
         if (results.Length < 2)
+        {
             return "";
+        }
 
         result = results[0];
 
